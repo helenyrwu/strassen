@@ -96,14 +96,8 @@ int main(int argc, char *argv[]) {
 	printf("Matrix 2: \n");
 	print_mat(m2,d);
 
-	// return pointer to certain size matrix function 
-
-	// strassen function 
-
-	// initial reading in matrices (padded or not)
-
 	strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d);
-	print_mat(res, 1);
+	print_mat(res, d);
 
 	for(int i = 0; i < d; i++) {
 	        free(m1[i]);
@@ -124,8 +118,11 @@ int main(int argc, char *argv[]) {
 // m1, m2 original matrices, result is the result matrix, r, c are the top left corner
 void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d) {
 
-	if (d == 1)
+	if (d == 1) {
 		result[r][c] = m1[r1][c1] * m2[r2][c2];
+		return;
+	}
+	
 	// allocate memory for x, y (temporary storage)
 	int **x = calloc(d/2, sizeof(int *));
 	int **y = calloc(d/2, sizeof(int *));
@@ -138,27 +135,39 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// operation 1 and 2 
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			printf("hello1,2\n");
-			x[i][j] = m1[i][j] - m1[i+d/2][j];
-			y[i][j] = m2[i+d/2][j+d/2] - m2[i][j+d/2];
+			x[i][j] = m1[r1+i][c1+j] - m1[r1+i+d/2][c1+j];
+			y[i][j] = m2[r2+i+d/2][c2+j+d/2] - m2[r2+i][c2+j+d/2];
 		}
 	}
+	printf("OP 1, 2:\n");
+	printf("Dim: %d, X:\n", d/2);
+	print_mat(x, d/2); 
+	printf("Dim: %d, Y:\n", d/2);
+	print_mat(y, d/2);
 
 	// op 3: 
 	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c, d/2); 
+	printf("MATRIX 3:\n"); 
+	print_mat(result, d);
+
 
 	// op 4, 5: 
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			printf("hello4\n");
 			x[i][j] = m1[r1+i+d/2][c1+j] + m1[r1+i+d/2][c1+j+d/2];
 			y[i][j] = m2[r2+i][c2+j+d/2] - m2[r2+i][c2+j];
 		}
 	}
+	printf("OP 4, 5:\n");
+	printf("Dim: %d, X:\n", d/2);
+	print_mat(x, d/2); 
+	printf("Dim: %d, Y:\n", d/2);
+	print_mat(y, d/2);
 
 	// op 6: 
-	printf("hello6\n");
 	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c + d/2, d/2);
+	printf("MATRIX 6:\n"); 
+	print_mat(result, d);
 
 	// op 7,8: 
 	for (int i = 0; i < d/2; i++) {
@@ -168,8 +177,17 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 		}
 	}
 
+	printf("OP 7, 8:\n");
+	printf("Dim: %d, X:\n", d/2);
+	print_mat(x, d/2); 
+	printf("Dim: %d, Y:\n", d/2);
+	print_mat(y, d/2); 
+
+
 	// op 9
-	strassen(x, 0, 0, y, 0, 0, result, r, c+d/2, d/2); 
+	strassen(x, 0, 0, y, 0, 0, result, r, c+d/2, d/2);
+	printf("MATRIX 9: \n");
+	print_mat(result, d);
 
 	// op 10
 	for (int i = 0; i < d/2; i++) {
@@ -177,12 +195,22 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 			x[i][j] = m1[r1 + i][c1 + j+d/2] - x[i][j];
 		}
 	}
+	printf("OP 10: \n");
+	printf("Dim: %d, X:\n", d/2);
+	print_mat(x, d/2);
 	
 	// op 11
-	strassen(x, 0, 0, m2, r2 + d/2, c2 + d/2, result, r, c, d/2); 
+	strassen(x, 0, 0, m2, r2 + d/2, c2 + d/2, result, r, c, d/2);
+	printf("MATRIX 11:\n");
+	print_mat(result, d);
 
 	// op 12
+	
 	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2);
+	printf("MATRIX 12:\n");
+	print_mat(result, d);
+	printf("12 X: \n"); 
+	print_mat(x, d/2);
 
 	// op 13
 	for (int i = 0; i < d/2; i++) {
@@ -190,14 +218,18 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 			result[r + i][c + d/2 + j] = x[i][j] + result[r + i][c + d/2 + j];
 		}
 	}
+	printf("MATRIX 13:\n");
+	print_mat(result, d);
 
 	// op 14
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			result[r + d/2 + i][c + i] = result[r + i][c + d/2 + j] 
+			result[r + d/2 + i][c + j] = result[r + i][c + d/2 + j] 
 										+ result[r + d/2 + i][c + j];
 		}
 	}
+	printf("MATRIX 14:\n");
+	print_mat(result, d);
 
 	// op 15
 	for (int i = 0; i < d/2; i++) {
@@ -206,22 +238,28 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 										+ result[r + d/2 + i][c + d/2 + j];
 		}
 	}
+	printf("MATRIX 15:\n");
+	print_mat(result, d);
 
 	// op 16
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			result[r + d/2 + i][c +  d/2 + i] = result[r + d/2 + i][c + j] +
+			result[r + d/2 + i][c +  d/2 + j] = result[r + d/2 + i][c + j] +
 												+ result[r + d/2 + i][c + d/2 + j];
 		}
 	}
+	printf("MATRIX 16:\n");
+	print_mat(result, d);
 
 	// op 17
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			result[r + i][c +  d/2 + i] = result[r + i][c +  d/2 + j] 
+			result[r + i][c +  d/2 + j] = result[r + i][c +  d/2 + j] 
 										+ result[r + i][c + j];
 		}
 	}
+	printf("MATRIX 17:\n");
+	print_mat(result, d);
 
 	//op 18
 	for (int i = 0; i < d/2; i++) {
@@ -229,9 +267,15 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 			y[i][j] = y[i][j] - m2[r2 + d/2 + i][c2 + j];
 		}
 	}
-
+	printf("OP 18:\n");
+	printf("Dim: %d, Y: \n", d/2);
+	print_mat(y, d/2);
+	
 	// op 19
 	strassen(m1, r1 + d/2, c1 + d/2, y, 0, 0, result, r, c, d/2);
+	printf("MATRIX 19:\n");
+	print_mat(result, d);
+	
 
 	// op 20
 	for (int i = 0; i < d/2; i++) {
@@ -240,9 +284,14 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 			- result[r + i][c + j];
 		}
 	}
+	printf("MATRIX 20:\n");
+	print_mat(result, d);
 
 	// op 21
 	strassen(m1, r1, c1 + d/2, m2, r2 + d/2, c2, result, r, c, d/2);
+	printf("MATRIX 21:\n");
+	print_mat(result, d);
+
 
 	// op 22
 	for (int i = 0; i < d/2; i++) {
@@ -250,17 +299,16 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 			result[r + i][c + j] = x[i][j] + result[r + i][c + j];
 		}
 	}
+	printf("MATRIX 22:\n");
+	print_mat(result, d);
 
-	for(int i = 0; i < d; i++) {
+	for(int i = 0; i < d/2; i++) {
 	        free(x[i]);
 	        free(y[i]);
 	}
 
 	free(x);
 	free(y);
-
-
-
 }
 
 bool is_power(int x) {
