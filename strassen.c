@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 }
 
 // m1, m2 original matrices, result is the result matrix, r, c are the top left corner
-void strassen(int** m1, int** m2, int** result, int r, int c, int d, ) {
+void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d, ) {
 
 	// allocate memory for x, y (temporary storage)
 	int **x = calloc(d/2, sizeof(int *));
@@ -139,7 +139,42 @@ void strassen(int** m1, int** m2, int** result, int r, int c, int d, ) {
 		}
 	}
 
-	// op 3
+	// op 3: 
+	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c, d/2); 
+
+	// op 4, 5: 
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			x[i][j] = m1[i+d/2][j] + m1[i+d/2][j+d/2];
+			y[i][j] = m2[i][j+d/2] - m2[i][j];
+		}
+	}
+
+	// op 6: 
+	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c + d/2, d/2);
+
+	// op 7,8: 
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			x[i][j] = x[i][j] - m1[i][j];
+			y[i][j] = m2[i+d/2][j+d/2] - y[i][j];
+		}
+	}
+
+	// op 9
+	strassen(x, 0, 0, y, 0, 0, result, r, c+d/2, d/2); 
+
+	// op 10
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			x[i][j] = m1[i][j+d/2] - x[i][j];
+		}
+	}
+	
+	// op 11
+	strassen(x, 0, 0, m2, d/2, d/2, result, 0, 0, d/2); 
+
+	// op 12
 	
 
 
