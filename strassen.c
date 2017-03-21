@@ -16,6 +16,8 @@ void print_mat(int **matrix, int dim);
 // function to test if power of two
 bool is_power(int x);
 
+void strassen(int** m1, int** m2, int d);
+
 int main(int argc, char *argv[]) {
 
 	// four arguments 
@@ -36,12 +38,16 @@ int main(int argc, char *argv[]) {
 	char* filename = argv[3];
 
 	// allocate memory (nearest power of 2)
-	int **m1 = calloc(d+1, sizeof(int));
-	int **m2 = calloc(d+1, sizeof(int));
+	int **m1 = calloc(d, sizeof(int *));
+	int **m2 = calloc(d, sizeof(int *));
 
-	for (int i = 0; i < d+1; i++) {
-		m1[i] = calloc(d+1, sizeof(int));
-		m2[i] = calloc(d+1, sizeof(int));
+	// result matrix
+	int **res = calloc(d, sizeof(int *));
+
+	for (int i = 0; i < d; i++) {
+		m1[i] = calloc(d, sizeof(int));
+		m2[i] = calloc(d, sizeof(int));
+		res[i] = calloc(d, sizeof(int));
 	}
 
 	// read matrices into allocated memory
@@ -89,17 +95,53 @@ int main(int argc, char *argv[]) {
 	}
 	printf("Matrix 2: \n");
 	print_mat(m2,d);
-	
-	for(int i = 0; i < d+1; i++) {
+
+	// return pointer to certain size matrix function 
+
+	// strassen function 
+
+	// initial reading in matrices (padded or not)
+
+
+	strassen(m1, m2, d); 
+
+	for(int i = 0; i < d; i++) {
 	        free(m1[i]);
 	        free(m2[i]);
 	}
+
 	free(m1);
 	free(m2);
 	free(str);
     
     fclose(fp);
 	return 0;
+
+}
+
+// m1, m2 original matrices, result is the result matrix, r, c are the top left corner
+void strassen(int** m1, int** m2, int** result, int r, int c, int d, ) {
+
+	// allocate memory for x, y (temporary storage)
+	int **x = calloc(d/2, sizeof(int *));
+	int **y = calloc(d/2, sizeof(int *));
+
+	for (int i = 0; i < d/2; i++) {
+		x[i] = calloc(d, sizeof(int));
+		y[i] = calloc(d, sizeof(int));
+	}
+
+	// operation 1 and 2 
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			x[i][j] = m1[i][j] - m1[i+d/2][j];
+			y[i][j] = m2[i+d/2][j+d/2] - m2[i][j+d/2];
+		}
+	}
+
+	// op 3
+	
+
 
 }
 
