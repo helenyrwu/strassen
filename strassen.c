@@ -16,7 +16,7 @@ void print_mat(int **matrix, int dim);
 // function to test if power of two
 bool is_power(int x);
 
-void strassen(int** m1, int** m2, int d);
+void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d);
 
 int main(int argc, char *argv[]) {
 
@@ -102,15 +102,17 @@ int main(int argc, char *argv[]) {
 
 	// initial reading in matrices (padded or not)
 
-
-	strassen(m1, m2, d); 
+	strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d);
+	print_mat(res, 1);
 
 	for(int i = 0; i < d; i++) {
 	        free(m1[i]);
 	        free(m2[i]);
+	        free(res[i]);
 	}
 
 	free(m1);
+	free(res);
 	free(m2);
 	free(str);
     
@@ -136,6 +138,7 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// operation 1 and 2 
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
+			printf("hello1,2\n");
 			x[i][j] = m1[i][j] - m1[i+d/2][j];
 			y[i][j] = m2[i+d/2][j+d/2] - m2[i][j+d/2];
 		}
@@ -147,12 +150,14 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// op 4, 5: 
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
+			printf("hello4\n");
 			x[i][j] = m1[r1+i+d/2][c1+j] + m1[r1+i+d/2][c1+j+d/2];
 			y[i][j] = m2[r2+i][c2+j+d/2] - m2[r2+i][c2+j];
 		}
 	}
 
 	// op 6: 
+	printf("hello6\n");
 	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c + d/2, d/2);
 
 	// op 7,8: 
@@ -177,7 +182,7 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	strassen(x, 0, 0, m2, r2 + d/2, c2 + d/2, result, r, c, d/2); 
 
 	// op 12
-	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2)
+	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2);
 
 	// op 13
 	for (int i = 0; i < d/2; i++) {
@@ -245,6 +250,16 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 			result[r + i][c + j] = x[i][j] + result[r + i][c + j];
 		}
 	}
+
+	for(int i = 0; i < d; i++) {
+	        free(x[i]);
+	        free(y[i]);
+	}
+
+	free(x);
+	free(y);
+
+
 
 }
 
