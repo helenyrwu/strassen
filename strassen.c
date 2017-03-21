@@ -120,8 +120,10 @@ int main(int argc, char *argv[]) {
 }
 
 // m1, m2 original matrices, result is the result matrix, r, c are the top left corner
-void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d, ) {
+void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d) {
 
+	if (d == 1)
+		result[r][c] = m1[r1][c1] * m2[r2][c2];
 	// allocate memory for x, y (temporary storage)
 	int **x = calloc(d/2, sizeof(int *));
 	int **y = calloc(d/2, sizeof(int *));
@@ -145,8 +147,8 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// op 4, 5: 
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			x[i][j] = m1[i+d/2][j] + m1[i+d/2][j+d/2];
-			y[i][j] = m2[i][j+d/2] - m2[i][j];
+			x[i][j] = m1[r1+i+d/2][c1+j] + m1[r1+i+d/2][c1+j+d/2];
+			y[i][j] = m2[r2+i][c2+j+d/2] - m2[r2+i][c2+j];
 		}
 	}
 
@@ -156,8 +158,8 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// op 7,8: 
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			x[i][j] = x[i][j] - m1[i][j];
-			y[i][j] = m2[i+d/2][j+d/2] - y[i][j];
+			x[i][j] = x[i][j] - m1[r1+i][c1+j];
+			y[i][j] = m2[r2+i+d/2][c2+j+d/2] - y[i][j];
 		}
 	}
 
@@ -167,16 +169,82 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// op 10
 	for (int i = 0; i < d/2; i++) {
 		for (int j = 0; j < d/2; j++) {
-			x[i][j] = m1[i][j+d/2] - x[i][j];
+			x[i][j] = m1[r1 + i][c1 + j+d/2] - x[i][j];
 		}
 	}
 	
 	// op 11
-	strassen(x, 0, 0, m2, d/2, d/2, result, 0, 0, d/2); 
+	strassen(x, 0, 0, m2, r2 + d/2, c2 + d/2, result, r, c, d/2); 
 
 	// op 12
-	
+	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2)
 
+	// op 13
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + i][c + d/2 + j] = x[i][j] + result[r + i][c + d/2 + j];
+		}
+	}
+
+	// op 14
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + d/2 + i][c + i] = result[r + i][c + d/2 + j] 
+										+ result[r + d/2 + i][c + j];
+		}
+	}
+
+	// op 15
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + i][c + d/2 + j] = result[r + i][c + d/2 + j] 
+										+ result[r + d/2 + i][c + d/2 + j];
+		}
+	}
+
+	// op 16
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + d/2 + i][c +  d/2 + i] = result[r + d/2 + i][c + j] +
+												+ result[r + d/2 + i][c + d/2 + j];
+		}
+	}
+
+	// op 17
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + i][c +  d/2 + i] = result[r + i][c +  d/2 + j] 
+										+ result[r + i][c + j];
+		}
+	}
+
+	//op 18
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			y[i][j] = y[i][j] - m2[r2 + d/2 + i][c2 + j];
+		}
+	}
+
+	// op 19
+	strassen(m1, r1 + d/2, c1 + d/2, y, 0, 0, result, r, c, d/2);
+
+	// op 20
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + d/2 + i][c + j] = result[r + d/2 + i][c + j] 
+			- result[r + i][c + j];
+		}
+	}
+
+	// op 21
+	strassen(m1, r1, c1 + d/2, m2, r2 + d/2, c2, result, r, c, d/2);
+
+	// op 22
+	for (int i = 0; i < d/2; i++) {
+		for (int j = 0; j < d/2; j++) {
+			result[r + i][c + j] = x[i][j] + result[r + i][c + j];
+		}
+	}
 
 }
 
