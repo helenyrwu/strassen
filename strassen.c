@@ -2,9 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define MAX_LENGTH 11 
-#define CROSSOVER 3
+
 // function to find the next power of two
 int next_power(int v); 
 
@@ -17,7 +18,9 @@ void print_mat(int **matrix, int dim);
 // function to test if power of two
 bool is_power(int x);
 
-void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d);
+void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d, int k);
+
+void initialize(int** m1, int** m2, char* file, int d, int n);
 
 int main(int argc, char *argv[]) {
 
@@ -51,54 +54,26 @@ int main(int argc, char *argv[]) {
 		res[i] = calloc(d, sizeof(int));
 	}
 
-	// read matrices into allocated memory
-	FILE *fp = fopen(filename,"r");
 
-	char *str = malloc(sizeof(char) * 12);
+	int cross = 3; 
 
+	for (int k = 1; k < cross+1; k++) {
+		
+		// initialize matrix 1 and matrix 2 
+		initialize(m1, m2, filename, d, n); 
+		
+		// begin timer
+		clock_t begin = clock();
 
-	for (int i= 0; i < d; i++) {
-		if (i < n) {
-			for (int j = 0; j < d; j++) {
-				if (j < n) {
-					fgets(str, MAX_LENGTH, fp); 
-					m1[i][j] = atoi(str); 
-				}
-				else m1[i][j] = 0; 	
-			}
-		}
-		else {
-			for (int j =0; j < d; j++) {
-				m1[i][j] =0;
-			}
-		}
+		// run strassen
+		strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, k);
+
+		clock_t end = clock(); 
+		double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+		printf("Crossover: %d, Time Spent: %.5f\n", k, time_spent);
+
+		print_mat(res, d);
 	}
-	printf("Matrix 1: \n");
-	print_mat(m1,d);
-
-	for (int i= 0; i < d; i++) {
-		if (i < n) {
-			for (int j = 0; j < d; j++) {
-				if (j < n) {
-					fgets(str, MAX_LENGTH, fp); 
-					m2[i][j] = atoi(str); 
-				}
-				else {
-					m2[i][j] = 0;
-				}
-			}
-		}
-		else {
-			for (int j =0; j < d; j++) {
-				m2[i][j]=0;
-			}
-		}
-	}
-	printf("Matrix 2: \n");
-	print_mat(m2,d);
-
-	strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d);
-	print_mat(res, d);
 
 	for(int i = 0; i < d; i++) {
 	        free(m1[i]);
@@ -109,17 +84,15 @@ int main(int argc, char *argv[]) {
 	free(m1);
 	free(res);
 	free(m2);
-	free(str);
-    
-    fclose(fp);
+
 	return 0;
 
 }
 
-// m1, m2 original matrices, result is the result matrix, r, c are the top left corner
-void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d) {
+// m1, m2 original matrices, result is the result matrix, r, c are the top left corner, d is dimension, k is crossover
+void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d, int k) {
 
-	if (d <= CROSSOVER) {
+	if (d <= k) {
 		// printf("helllooo");
 		mat_mul(m1, r1, c1, m2, r2, c2, result, r, c, d);
 		return;
@@ -153,9 +126,9 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// print_mat(y, d/2);
 
 	// op 3: 
-	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c, d/2); 
-	printf("MATRIX 3:\n"); 
-	print_mat(result, 4);
+	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c, d/2, k); 
+	// printf("MATRIX 3:\n"); 
+	// print_mat(result, 4);
 
 
 	// op 4, 5: 
@@ -172,9 +145,9 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// print_mat(y, d/2);
 
 	// op 6: 
-	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c + d/2, d/2);
-	printf("MATRIX 6:\n"); 
-	print_mat(result, 4);
+	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c + d/2, d/2, k);
+	// printf("MATRIX 6:\n"); 
+	// // print_mat(result, 4);
 
 	// op 7,8: 
 	for (int i = 0; i < d/2; i++) {
@@ -192,7 +165,7 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 
 
 	// op 9
-	strassen(x, 0, 0, y, 0, 0, result, r, c+d/2, d/2);
+	strassen(x, 0, 0, y, 0, 0, result, r, c+d/2, d/2, k);
 	// printf("MATRIX 9: \n");
 	// print_mat(result, d);
 
@@ -207,17 +180,17 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// print_mat(x, d/2);
 	
 	// op 11
-	strassen(x, 0, 0, m2, r2 + d/2, c2 + d/2, result, r, c, d/2);
+	strassen(x, 0, 0, m2, r2 + d/2, c2 + d/2, result, r, c, d/2, k);
 	// printf("MATRIX 11:\n");
 	// print_mat(result, d);
 
 	// op 12
 	
-	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2);
-	printf("MATRIX 12:\n");
-	print_mat(result, 4);
-	printf("12 X: \n"); 
-	print_mat(x, 1);
+	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2, k);
+	// printf("MATRIX 12:\n");
+	// // print_mat(result, 4);
+	// printf("12 X: \n"); 
+	// // print_mat(x, 1);
 
 	// op 13
 	for (int i = 0; i < d/2; i++) {
@@ -279,7 +252,7 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// print_mat(y, d/2);
 	
 	// op 19
-	strassen(m1, r1 + d/2, c1 + d/2, y, 0, 0, result, r, c, d/2);
+	strassen(m1, r1 + d/2, c1 + d/2, y, 0, 0, result, r, c, d/2, k);
 	// printf("MATRIX 19:\n");
 	// print_mat(result, d);
 	
@@ -295,7 +268,7 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// print_mat(result, d);
 
 	// op 21
-	strassen(m1, r1, c1 + d/2, m2, r2 + d/2, c2, result, r, c, d/2);
+	strassen(m1, r1, c1 + d/2, m2, r2 + d/2, c2, result, r, c, d/2, k);
 	// printf("MATRIX 21:\n");
 	// print_mat(result, d);
 
@@ -351,6 +324,61 @@ void mat_mul(int **mat1, int r1, int c1, int **mat2, int r2, int c2, int **resul
 	// printf("Result:\n");
 	// print_mat(result,n);
 	return;
+}
+
+void initialize(int** m1, int** m2, char* file, int d, int n) {
+
+	// open file
+	FILE *fp = fopen(file,"r");
+
+	char *str = malloc(sizeof(char) * 12);
+
+	// read matrices from file into allocated memory
+	for (int i= 0; i < d; i++) {
+		if (i < n) {
+			for (int j = 0; j < d; j++) {
+				if (j < n) {
+					fgets(str, MAX_LENGTH, fp); 
+					m1[i][j] = atoi(str); 
+				}
+				else m1[i][j] = 0; 	
+			}
+		}
+		else {
+			for (int j =0; j < d; j++) {
+				m1[i][j] =0;
+			}
+		}
+	}
+	printf("Matrix1: \n");
+	print_mat(m1,d);
+
+	for (int i= 0; i < d; i++) {
+		if (i < n) {
+			for (int j = 0; j < d; j++) {
+				if (j < n) {
+					fgets(str, MAX_LENGTH, fp); 
+					m2[i][j] = atoi(str); 
+				}
+				else {
+					m2[i][j] = 0;
+				}
+			}
+		}
+		else {
+			for (int j =0; j < d; j++) {
+				m2[i][j]=0;
+			}
+		}
+	}
+	printf("Matrix 2: \n");
+	print_mat(m2,d);
+
+	// free memory
+	free(str);
+    
+    fclose(fp);
+
 }
 
 int next_power(int v) {
