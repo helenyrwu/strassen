@@ -54,8 +54,15 @@ int main(int argc, char *argv[]) {
 		res[i] = calloc(d, sizeof(int));
 	}
 
+	initialize(m1, m2, filename, d, n); 
+	clock_t begin = clock();
+	strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, 100); 
+	clock_t end = clock(); 
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	// printf("CROSSOVER: 100, Time Spent: %.5f\n", time_spent);
 
-	int cross = 3; 
+	int flag = 0; 
+	int cross = 1; 
 
 	for (int k = 1; k < cross+1; k++) {
 		
@@ -63,16 +70,28 @@ int main(int argc, char *argv[]) {
 		initialize(m1, m2, filename, d, n); 
 		
 		// begin timer
-		clock_t begin = clock();
+		clock_t b1 = clock();
 
 		// run strassen
 		strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, k);
 
-		clock_t end = clock(); 
-		double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-		printf("Crossover: %d, Time Spent: %.5f\n", k, time_spent);
+		clock_t e1 = clock(); 
 
-		print_mat(res, d);
+		double new_time = (double)(e1 - b1) / CLOCKS_PER_SEC;
+		printf("Crossover: %d, Time Spent: %.5f\n", k, new_time);
+
+		// if (new_time < time_spent && flag == 0) {
+		// 	printf("Crossover: %d\n", k); 
+		// 	printf("%f\n", new_time);
+		// 	flag++;
+		// }
+
+		if (new_time < time_spent) {
+			printf("SUCCESS: %f \n", new_time);
+
+		}
+
+		// print_mat(res, d);
 	}
 
 	for(int i = 0; i < d; i++) {
@@ -350,8 +369,8 @@ void initialize(int** m1, int** m2, char* file, int d, int n) {
 			}
 		}
 	}
-	printf("Matrix1: \n");
-	print_mat(m1,d);
+	// printf("Matrix1: \n");
+	// print_mat(m1,d);
 
 	for (int i= 0; i < d; i++) {
 		if (i < n) {
@@ -371,8 +390,8 @@ void initialize(int** m1, int** m2, char* file, int d, int n) {
 			}
 		}
 	}
-	printf("Matrix 2: \n");
-	print_mat(m2,d);
+	// printf("Matrix 2: \n");
+	// print_mat(m2,d);
 
 	// free memory
 	free(str);
