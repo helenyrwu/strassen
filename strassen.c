@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <limits.h> 
+#include <math.h> 
 
 #define MAX_LENGTH 11 
 
@@ -30,7 +32,7 @@ int main(int argc, char *argv[]) {
 
 	// given dimension
 	int n = atoi(argv[2]);
-	printf("Dimension: %d\n",n);
+	// printf("Dimension: %d\n",n);
 
 	// dimension to be used 
 	int d; 
@@ -54,17 +56,21 @@ int main(int argc, char *argv[]) {
 		res[i] = calloc(d, sizeof(int));
 	}
 
-	initialize(m1, m2, filename, d, n); 
-	clock_t begin = clock();
-	strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, 100); 
-	clock_t end = clock(); 
-	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	// initialize(m1, m2, filename, d, n); 
+	// clock_t begin = clock();
+	// strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, 100); 
+	// clock_t end = clock(); 
+	// double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 	// printf("CROSSOVER: 100, Time Spent: %.5f\n", time_spent);
 
-	int flag = 0; 
-	int cross = 1; 
+	// to find n_0
+	double min = INFINITY;  
+	int crossover = 0; 
 
-	for (int k = 1; k < cross+1; k++) {
+	int lim = 100; 
+	int k = 0; 
+
+	for (k = 1; k < lim+1; k++) {
 		
 		// initialize matrix 1 and matrix 2 
 		initialize(m1, m2, filename, d, n); 
@@ -78,7 +84,7 @@ int main(int argc, char *argv[]) {
 		clock_t e1 = clock(); 
 
 		double new_time = (double)(e1 - b1) / CLOCKS_PER_SEC;
-		printf("Crossover: %d, Time Spent: %.5f\n", k, new_time);
+		// printf("Crossover: %d, Time Spent: %.5f\n", k, new_time);
 
 		// if (new_time < time_spent && flag == 0) {
 		// 	printf("Crossover: %d\n", k); 
@@ -86,13 +92,17 @@ int main(int argc, char *argv[]) {
 		// 	flag++;
 		// }
 
-		if (new_time < time_spent) {
-			printf("SUCCESS: %f \n", new_time);
-
+		if (new_time < min) {
+			min = new_time; 
+			crossover = k; 
 		}
 
 		// print_mat(res, d);
 	}
+
+	printf("CROSSOVER: %d\n", crossover); 
+	printf("Min time: %.5f\n", min); 
+
 
 	for(int i = 0; i < d; i++) {
 	        free(m1[i]);
