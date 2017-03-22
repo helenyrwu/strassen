@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define MAX_LENGTH 11 
-#define CROSSOVER 2
+#define CROSSOVER 3
 // function to find the next power of two
 int next_power(int v); 
 
@@ -120,12 +120,10 @@ int main(int argc, char *argv[]) {
 void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, int r, int c, int d) {
 
 	if (d <= CROSSOVER) {
-		printf("helllooo");
+		// printf("helllooo");
 		mat_mul(m1, r1, c1, m2, r2, c2, result, r, c, d);
 		return;
 	}
-
-	printf("HIIII");
 
 	// if (d == 1) {
 	// 	result[r][c] = m1[r1][c1] * m2[r2][c2];
@@ -156,8 +154,8 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 
 	// op 3: 
 	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c, d/2); 
-	// printf("MATRIX 3:\n"); 
-	// print_mat(result, d);
+	printf("MATRIX 3:\n"); 
+	print_mat(result, 4);
 
 
 	// op 4, 5: 
@@ -175,8 +173,8 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 
 	// op 6: 
 	strassen(x, 0, 0, y, 0, 0, result, r + d/2, c + d/2, d/2);
-	// printf("MATRIX 6:\n"); 
-	// print_mat(result, d);
+	printf("MATRIX 6:\n"); 
+	print_mat(result, 4);
 
 	// op 7,8: 
 	for (int i = 0; i < d/2; i++) {
@@ -216,10 +214,10 @@ void strassen(int** m1, int r1, int c1, int** m2, int r2, int c2, int** result, 
 	// op 12
 	
 	strassen(m1, r1, c1, m2, r2, c2, x, 0, 0, d/2);
-	// printf("MATRIX 12:\n");
-	// print_mat(result, d);
-	// printf("12 X: \n"); 
-	// print_mat(x, d/2);
+	printf("MATRIX 12:\n");
+	print_mat(result, 4);
+	printf("12 X: \n"); 
+	print_mat(x, 1);
 
 	// op 13
 	for (int i = 0; i < d/2; i++) {
@@ -327,18 +325,31 @@ bool is_power(int x) {
 }
 
 void mat_mul(int **mat1, int r1, int c1, int **mat2, int r2, int c2, int **result, int r, int c, int d) {
+	// printf("%d", n);
+
 	// for (int i = 0; i < n; i++) {
 	// 	result[i] = calloc(n, sizeof(int));
 	// }
+	// printf("mat_mul:\n");
+	// printf("%d %d\n", r1, c1);
+	// printf("%d %d\n", r2, c2);
+	// printf("%d %d\n", r, c);
+	// printf("%d\n", d);
 	for (int i = 0; i < d; i++) {
 		for (int j = 0; j < d; j++) {
+			result[r + i][c + j] = 0;
 			for (int k = 0; k < d; k++) {
+				// printf("before: %d\n",result[r + i][c + j]);
 				result[r + i][c + j] += mat1[i + r1][k + c1] * mat2[k + r2][j + c2];
-				printf("%d * %d ", mat1[i + r1][k + c1], mat2[k + r2][j + c2]);
+				// printf("(%d, %d): ", r+i, c+j);
+				// printf("%d * %d\n", mat1[i + r1][k + c1], mat2[k + r2][j + c2]);
+				// printf("after: %d\n",result[r + i][c + j]);
 			}
-			printf("%d\n",result[r + i][c + j]);
+			// printf("%d\n",result[r + i][c + j]);
 		}
 	}
+	// printf("Result:\n");
+	// print_mat(result,n);
 	return;
 }
 
