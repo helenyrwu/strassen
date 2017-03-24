@@ -63,60 +63,66 @@ int main(int argc, char *argv[]) {
 	int print_cross[trials]; 
 	double print_times[trials]; 
 
-	// trials 
+	// FOR TESTING PURPOSES
+	if (trials != 0) {
 	for (int i = 0; i < trials; i ++) {
-		// to find n_0
-		double min = INFINITY;  
-		int crossover = 0; 
+			// to find n_0
+			double min = INFINITY;  
+			int crossover = 0; 
 
-		int lim = 500; 
-		int k = 0; 
+			int lim = 4; 
+			int k = 0; 
 
-		for (k = 1; k < lim+1; k+=10) {
-			
-			// initialize matrix 1 and matrix 2 
-			initialize(m1, m2, filename, d, n); 
-			
-			// begin timer
-			clock_t b1 = clock();
+			for (k = 20; k < lim+1; k++) {
+				
+				// initialize matrix 1 and matrix 2 
+				initialize(m1, m2, filename, d, n); 
+				
+				// begin timer
+				clock_t b1 = clock();
 
-			// run strassen
-			strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, k);
+				// run strassen
+				strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, k);
 
-			clock_t e1 = clock(); 
+				clock_t e1 = clock(); 
 
-			double new_time = (double)(e1 - b1) / CLOCKS_PER_SEC;
-			// printf("Crossover: %d, Time Spent: %.5f\n", k, new_time);
+				double new_time = (double)(e1 - b1) / CLOCKS_PER_SEC;
 
-			// if (new_time < time_spent && flag == 0) {
-			// 	printf("Crossover: %d\n", k); 
-			// 	printf("%f\n", new_time);
-			// 	flag++;
-			// }
+				// printf("Crossover: %d, Time Spent: %.5f\n", k, new_time);
 
-			if (new_time < min) {
-				min = new_time; 
-				crossover = k; 
+				if (new_time < min) {
+					min = new_time; 
+					crossover = k; 
+				}
+
+				// print_mat(res, d);
 			}
 
-			// print_mat(res, d);
+			print_cross[i] = crossover; 
+			print_times[i] = min; 
 		}
 
-		print_cross[i] = crossover; 
-		print_times[i] = min; 
+	}
+	
+	else if (trials == 0) {
+		initialize(m1, m2, filename, d, n);
+		strassen(m1, 0, 0, m2, 0, 0, res, 0, 0, d, 63);
+		for (int i = 0; i < n; i++ ) {
+			printf("%d\n", res[i][i]);
+		}
 
 	}
+	
 
-	printf("CROSSOVER: \n"); 
-	for (int i =0; i < trials; i ++) {
-		printf("%d\n", print_cross[i]);
-	}
-	printf("TIMES: \n"); 
+	// printf("CROSSOVER: \n"); 
+	// for (int i = 0; i < trials; i ++) {
+	// 	printf("%d\n", print_cross[i]);
+	// }
+	// printf("TIMES: \n"); 
 
-	for (int i =0; i < trials; i ++) {
-		printf("%.5f\n", print_times[i]);
-	}
-
+	// for (int i =0; i < trials; i ++) {
+	// 	printf("%.5f\n", print_times[i]);
+	// 
 
 
 	for(int i = 0; i < d; i++) {
