@@ -45,7 +45,9 @@ int main(int argc, char *argv[]) {
 
 	// number of trials 
 	int trials = atoi(argv[1]); 
-	printf("Num Trials: %d\n", trials);
+	if (trials != 0) {
+		printf("Num Trials: %d\n", trials);
+	}
 
 	// allocate memory (nearest power of 2)
 	int **m1 = calloc(d, sizeof(int *));
